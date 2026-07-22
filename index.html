@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cute Tutor Bot</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="hero__emoji">🧠✨</div>
+        <div>
+          <h1>Happy Tutor Bot</h1>
+          <p>A friendly, cute study buddy for quick learning tips.</p>
+        </div>
+      </header>
+
+      <section class="chat-window" id="chatWindow">
+        <div class="message bot-message">
+          <span class="message__bubble">
+            Hi there! I'm your cute tutor buddy. 😊
+            <br />Ask me anything about studying, homework help, or learning tips!
+          </span>
+        </div>
+      </section>
+
+      <form class="input-panel" id="chatForm">
+        <input
+          id="userInput"
+          type="text"
+          placeholder="Type a question or say hi..."
+          autocomplete="off"
+          required
+        />
+        <button type="submit">Send</button>
+      </form>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

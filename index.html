@@ -3,24 +3,328 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cute Tutor Bot</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Chef Buddy Tutor</title>
+    <style>
+      :root {
+        --bg-top: #fffaf3;
+        --bg-bottom: #ffe5f3;
+        --panel: #ffffff;
+        --panel-strong: #ffd5e2;
+        --accent: #ff7bbb;
+        --accent-strong: #ff4368;
+        --text: #2b1f34;
+        --text-soft: #6d5370;
+        --shadow: 0 24px 60px rgba(255, 98, 170, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", system-ui, sans-serif;
+        background: radial-gradient(circle at top left, #fff3dd 0%, #ffe3eb 35%, #f9e6ff 100%);
+        color: var(--text);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.9), transparent 22%),
+          radial-gradient(circle at 80% 10%, rgba(255, 191, 201, 0.45), transparent 18%),
+          radial-gradient(circle at 50% 92%, rgba(255, 221, 245, 0.7), transparent 30%);
+        pointer-events: none;
+      }
+
+      .app-shell {
+        position: relative;
+        width: min(760px, calc(100% - 32px));
+        margin: 32px auto 48px;
+        padding: 0;
+        border-radius: 36px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 248, 248, 0.98) 100%);
+        border: 1px solid rgba(255, 183, 219, 0.44);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 32px 32px 24px;
+      }
+
+      .hero__emoji {
+        width: 76px;
+        height: 76px;
+        display: grid;
+        place-items: center;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #fff1fb, #ffcee0);
+        border: 1px solid rgba(255, 102, 164, 0.18);
+        box-shadow: inset 0 6px 14px rgba(255, 255, 255, 0.75);
+        font-size: 2.5rem;
+      }
+
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        letter-spacing: -0.02em;
+      }
+
+      .hero p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--text-soft);
+      }
+
+      .hero .hero-badge {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 16px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 111, 160, 0.14);
+        color: #c81f7c;
+        font-size: 0.91rem;
+        width: fit-content;
+      }
+
+      .status-panel {
+        display: grid;
+        gap: 16px;
+        padding: 0 32px 24px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(90px, 1fr));
+        gap: 14px;
+      }
+
+      .stat-card {
+        padding: 18px;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff 0%, #ffe8f1 100%);
+        border: 1px solid rgba(255, 141, 183, 0.2);
+        text-align: center;
+      }
+
+      .stat-card strong {
+        display: block;
+        font-size: 1.45rem;
+        margin-bottom: 6px;
+      }
+
+      .stat-card span {
+        color: var(--text-soft);
+        font-size: 0.95rem;
+      }
+
+      .hint-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 4px;
+      }
+
+      .hint-chip {
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: #ffedf6;
+        border: 1px solid rgba(255, 148, 194, 0.3);
+        color: #9f3a6c;
+        cursor: pointer;
+        transition: transform 0.16s ease, background 0.16s ease;
+      }
+
+      .hint-chip:hover {
+        transform: translateY(-2px);
+        background: #ffd4e7;
+      }
+
+      .chat-window {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 0 32px 20px;
+        max-height: 58vh;
+        overflow-y: auto;
+      }
+
+      .message {
+        display: flex;
+      }
+
+      .message__bubble {
+        max-width: 82%;
+        padding: 16px 18px;
+        border-radius: 30px;
+        line-height: 1.6;
+        font-size: 1rem;
+        white-space: pre-wrap;
+      }
+
+      .bot-message {
+        justify-content: flex-start;
+      }
+
+      .bot-message .message__bubble {
+        background: linear-gradient(135deg, #fff0f8, #ffe0ee);
+        border: 1px solid rgba(255, 114, 159, 0.18);
+        color: var(--text);
+        border-bottom-left-radius: 10px;
+        animation: float-in 0.28s ease;
+      }
+
+      .user-message {
+        justify-content: flex-end;
+      }
+
+      .user-message .message__bubble {
+        background: #ffeef7;
+        border: 1px solid rgba(255, 106, 151, 0.25);
+        color: var(--text);
+        border-bottom-right-radius: 10px;
+      }
+
+      .input-panel {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        padding: 22px 32px 32px;
+        background: linear-gradient(180deg, #fff8fb 0%, #fff3fa 100%);
+        border-top: 1px solid rgba(255, 147, 173, 0.3);
+      }
+
+      .input-panel input {
+        width: 100%;
+        border: 1px solid rgba(255, 134, 187, 0.35);
+        border-radius: 18px;
+        padding: 16px 18px;
+        font-size: 1rem;
+        color: var(--text);
+        background: #ffffff;
+        outline: none;
+      }
+
+      .input-panel input::placeholder {
+        color: #bf8ea8;
+      }
+
+      .input-panel input:focus {
+        box-shadow: 0 0 0 4px rgba(255, 149, 195, 0.16);
+        border-color: rgba(255, 118, 173, 0.55);
+      }
+
+      .input-panel button {
+        border: none;
+        border-radius: 18px;
+        padding: 16px 24px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .input-panel button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 20px rgba(255, 105, 173, 0.22);
+      }
+
+      .footer-note {
+        padding: 0 32px 24px;
+        color: var(--text-soft);
+        font-size: 0.95rem;
+      }
+
+      @keyframes float-in {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .app-shell {
+          width: calc(100% - 20px);
+          margin: 20px auto 28px;
+        }
+
+        .hero {
+          flex-wrap: wrap;
+          padding: 26px 24px 18px;
+        }
+
+        .status-panel,
+        .chat-window,
+        .input-panel,
+        .footer-note {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(100px, 1fr));
+        }
+      }
+    </style>
   </head>
   <body>
     <main class="app-shell">
       <header class="hero">
-        <div class="hero__emoji">🧠✨</div>
+        <div class="hero__emoji">🍳</div>
         <div>
-          <h1>Happy Tutor Bot</h1>
-          <p>A friendly, cute study buddy for quick learning tips.</p>
+          <h1>Chef Buddy</h1>
+          <p>Your playful cooking tutor that helps you master recipes, kitchen tricks, and delicious menus.</p>
+          <div class="hero-badge">Cooking level: Apprentice → Master Chef</div>
         </div>
       </header>
 
-      <section class="chat-window" id="chatWindow">
+      <section class="status-panel">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <strong>500+</strong>
+            <span>Recipes ready</span>
+          </div>
+          <div class="stat-card">
+            <strong>120</strong>
+            <span>Chef secrets</span>
+          </div>
+          <div class="stat-card">
+            <strong>24/7</strong>
+            <span>Kitchen support</span>
+          </div>
+        </div>
+        <div class="hint-strip">
+          <button class="hint-chip" type="button" data-prompt="How do I make a creamy mushroom risotto?">
+            Creamy risotto
+          </button>
+          <button class="hint-chip" type="button" data-prompt="What spices should I use for a perfect chicken curry?">
+            Chicken curry tips
+          </button>
+          <button class="hint-chip" type="button" data-prompt="Give me a quick dessert recipe for chocolate lovers.">
+            Dessert idea
+          </button>
+        </div>
+      </section>
+
+      <section class="chat-window" id="chatWindow" aria-live="polite">
         <div class="message bot-message">
           <span class="message__bubble">
-            Hi there! I'm your cute tutor buddy. 😊
-            <br />Ask me anything about studying, homework help, or learning tips!
+            Hello, future master chef! 🍽️
+            <br />Ask me for recipes, cooking hacks, meal ideas, or plating advice.
           </span>
         </div>
       </section>
@@ -29,14 +333,105 @@
         <input
           id="userInput"
           type="text"
-          placeholder="Type a question or say hi..."
+          placeholder="Type your cooking question here..."
           autocomplete="off"
           required
         />
-        <button type="submit">Send</button>
+        <button type="submit">Ask Chef Buddy</button>
       </form>
+
+      <div class="footer-note">
+        Tip: Click a suggestion to get started quickly, or type your own kitchen question.
+      </div>
     </main>
 
-    <script src="script.js"></script>
+    <script>
+      const chatWindow = document.getElementById("chatWindow");
+      const chatForm = document.getElementById("chatForm");
+      const userInput = document.getElementById("userInput");
+      const hintChips = document.querySelectorAll(".hint-chip");
+
+      function addMessage(text, isUser = false) {
+        const wrapper = document.createElement("div");
+        wrapper.className = isUser ? "message user-message" : "message bot-message";
+
+        const bubble = document.createElement("span");
+        bubble.className = "message__bubble";
+        bubble.textContent = text;
+
+        wrapper.appendChild(bubble);
+        chatWindow.appendChild(wrapper);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+
+      async function getChefResponse(message) {
+        // Build the request payload that the classroom proxy expects.
+        const requestBody = {
+          model: "class-chat-model",
+          messages: [
+            {
+              role: "user",
+              content: message,
+            },
+          ],
+        };
+
+        try {
+          const response = await fetch("https://vibe-proxy-gqv4.onrender.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer sk-vibe-summer-2026",
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error?.message || "Server returned an unexpected response.");
+          }
+
+          // Parse the assistant's message from the response payload.
+          return data.choices?.[0]?.message?.content?.trim() || "Chef Buddy didn't return a reply yet. Please try again.";
+        } catch (error) {
+          console.error("Fetch error:", error);
+          return "I had trouble reaching the cooking tutor. Please try again in a moment.";
+        }
+      }
+
+      async function sendMessage(message) {
+        addMessage(message, true);
+        addMessage("Stirring the pot... 🍲", false);
+
+        const responseText = await getChefResponse(message);
+
+        const lastBotBubble = chatWindow.querySelector(".message.bot-message:last-child .message__bubble");
+        if (lastBotBubble) {
+          lastBotBubble.textContent = responseText;
+        }
+      }
+
+      chatForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        userInput.value = "";
+        await sendMessage(message);
+      });
+
+      hintChips.forEach((chip) => {
+        chip.addEventListener("click", async () => {
+          const prompt = chip.dataset.prompt;
+          if (!prompt) return;
+          userInput.value = prompt;
+          await sendMessage(prompt);
+        });
+      });
+
+      // Optional: focus the input field immediately so the user can start typing.
+      userInput.focus();
+    </script>
   </body>
 </html>
